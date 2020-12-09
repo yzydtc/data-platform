@@ -4,7 +4,7 @@
 object App {
 
   /**
-   * app里面包含main，也就意味着，我们可以把打成jar，每次运行的时候传入的参数不一样，
+   *
    * 所有我们要对传入的参数做一些解析成自己想要的结构
    * @param args
    * @return
@@ -49,7 +49,6 @@ object App {
     //val tpmArgs = Array("-engine.zkServers","node01:2181")
     val tpmArgs2 = Array("-engine.tag","tag_1","tag_2")
     parseArgs(tpmArgs2)
-
 
   }
 }
