@@ -1,3 +1,7 @@
+package com.xyz.engine
+
+import com.xyz.engine.intepreter.SparkInterpreter
+
 /**
  * 平台服务启动的入口
  */
@@ -47,8 +51,11 @@ object App {
 
   def main(args: Array[String]): Unit = {
     //val tpmArgs = Array("-engine.zkServers","node01:2181")
-    val tpmArgs2 = Array("-engine.tag","tag_1","tag_2")
-    parseArgs(tpmArgs2)
-
+    //val tpmArgs2 = Array("-engine.tag","tag_1","tag_2")
+    //parseArgs(tpmArgs2)
+    //构建spark的解析器
+    val interpreter = new SparkInterpreter
+    val sparkConf = interpreter.start()
+    sparkConf.set("spark.driver.host","localhost")
   }
 }
