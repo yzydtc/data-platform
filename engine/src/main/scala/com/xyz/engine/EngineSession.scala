@@ -6,7 +6,8 @@ import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 import com.xyz.domain.engine.Job
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-class EngineSession(platEngine: String, _tag: String) {
+
+class EngineSession(platEngine: String, _tag: Option[String]) {
   def engineInfo = platEngine
 
   def tag = _tag

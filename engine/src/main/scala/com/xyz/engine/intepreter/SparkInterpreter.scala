@@ -98,7 +98,7 @@ class SparkInterpreter extends AbstractSparkInterpreter {
 
   /**根据sparkConf的参数，获取用户的jar包*/
   protected def getUserJars(conf:SparkConf,isShell:Boolean=false):Seq[String] = {
-    val sparkJars = conf.getOption("spaark.jars")
+    val sparkJars = conf.getOption("spark.jars")
     //如果是spark on yarn 则合并spark和yarn的jar路径
     if(isShell && conf.get("spark.master")=="yarn") {
       val yarnJars = conf.getOption("spark.yarn.dist.jars")
