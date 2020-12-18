@@ -3,7 +3,7 @@ package com.xyz.engine
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import com.xyz.common.AkkaUtils
-import com.xyz.engine.intepreter.SparkInterpreter
+import com.xyz.engine.interpreter.SparkInterpreter
 import com.xyz.utils.{GlobalConfigUtils, ZKUtils}
 import org.apache.spark.network.netty.SparkTransportConf
 

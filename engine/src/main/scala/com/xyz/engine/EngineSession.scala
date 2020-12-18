@@ -69,9 +69,9 @@ object EngineSession {
       .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
       //es
-      .config("es.index.auto.create", "true") //在spark中自动创建es中的索引
-      .config("es.nodes", "cdh1") //设置在spark中连接es的url和端口
-      .config("es.port", "9200")
+      //      .config("es.index.auto.create", "true") //在spark中自动创建es中的索引
+      //      .config("es.nodes", "cdh1") //设置在spark中连接es的url和端口
+      //      .config("es.port", "9200")
 
       /**
        * es.nodes.wan.only设置为true时即只通过client节点进行读取操作，因此主节点负载会特别高，性能很差。

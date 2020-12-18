@@ -1,4 +1,4 @@
-package com.xyz.engine.intepreter
+package com.xyz.engine.interpreter
 
 import java.io.ByteArrayOutputStream
 
@@ -41,7 +41,7 @@ abstract class AbstractSparkInterpreter extends Interpreter {
   }
 
   //解析错误信息
-  private def parseError(stdout: String): (String, Seq[String]) = {
+  protected[interpreter] def parseError(stdout: String): (String, Seq[String]) = {
     //按照换行符解析
     val lines = Keep_NEWLINE_REGEX.split(stdout)
     //获取堆栈信息
@@ -147,8 +147,8 @@ abstract class AbstractSparkInterpreter extends Interpreter {
   }
 
   /** 解析代码 */
-  override private[intepreter] def execute(order: String): Interpreter.ExecuteResponse = {
-    //打破双亲委派机制，程序会有限走excuteLines这个方法
+  override def execute(order: String): Interpreter.ExecuteResponse = {
+    //打破双亲委派机制，程序会优先走excuteLines这个方法
     restoreContextClassLoader {
       require(isStarted())
       executeLines(order.trim.split("\n").toList, Interpreter.ExecuteSuccess(
@@ -174,6 +174,6 @@ abstract class AbstractSparkInterpreter extends Interpreter {
 object AbstractSparkInterpreter {
   //反向肯定预测，匹配命令当中的换行符
   //命令：就是要执行的代码中的换行符
-  private[intepreter] val Keep_NEWLINE_REGEX = """(?<=\n)""".r
+  private[interpreter] val Keep_NEWLINE_REGEX = """(?<=\n)""".r
 }
 

@@ -1,4 +1,4 @@
-package com.xyz.engine.intepreter
+package com.xyz.engine.interpreter
 
 import java.io.{File, PrintWriter}
 import java.nio.file.{Files, Paths}

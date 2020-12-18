@@ -1,8 +1,11 @@
 package com.xyz.engine
 
+import java.io.{ByteArrayOutputStream, PrintStream}
+
 import akka.actor.{Actor, Props}
-import com.xyz.domain.engine.Job
-import com.xyz.engine.intepreter.SparkInterpreter
+import com.xyz.domain.{CommandMode, ResultDataType}
+import com.xyz.domain.engine.{Instruction, Job}
+import com.xyz.engine.interpreter.SparkInterpreter
 import com.xyz.logging.Logging
 import com.xyz.utils.{GlobalConfigUtils, ZKUtils}
 import org.I0Itec.zkclient.ZkClient
@@ -29,6 +32,7 @@ class JobActor(
   var sparkSession: SparkSession = _
   var interpreter: SparkInterpreter = _
 
+  //初始化
   override def preStart(): Unit = {
     warn(
       """
@@ -46,9 +50,51 @@ class JobActor(
     ZKUtils.registerActorInPlatEngine(zkClient, valid_engine_path, engineSession.tag.getOrElse("default"))
   }
 
+  /**
+   * 每接收一条消息调用一次
+   *
+   * @return
+   */
   //处理业务
   override def receive: Receive = {
-    null
+    //匹配指令
+    case Instruction(commandMode, instruction, variables, _token) => {
+      actorHook() {
+        () =>
+          //组装命令
+          var assemble_instruction = instruction
+          token = _token
+          //封装job
+          job = Job(instruction = instruction, variables = variables)
+          var globalGroupId = GlobalGroupId.groupId
+          job.engineInfoAndGroup = s"${engineSession.engineInfo}_${globalGroupId}"
+          //将job发送到客户端
+          sender ! job
+
+          //清理spark的信息
+          //提前清理可能存在的线程副本
+          sparkSession.sparkContext.clearJobGroup()
+          //设置作业的描述
+          sparkSession.sparkContext.setJobDescription(s"running job:${instruction}")
+          //设置线程组ID，后面的作业，由这个线程启动
+          sparkSession.sparkContext.setJobGroup("groupId:" + globalGroupId, "instruction:" + instruction)
+          //匹配命令
+          commandMode match {
+            case CommandMode.SQL =>
+            case CommandMode.CODE =>
+              //打印命令
+              //   info("\n" + ("*" * 80) + "\n" +assemble_instruction + "\n" + ("*" * 80))
+              //job执行模式
+              // job.mode = CommandMode.CODE
+              //替换字符串
+              assemble_instruction = assemble_instruction.replaceAll("'", "\"").replaceAll("\n", " ")
+              //执行代码
+              val response = interpreter.execute(assemble_instruction)
+            case _ =>
+          }
+
+      }
+    }
   }
 
   //结束
@@ -66,13 +112,30 @@ class JobActor(
     sparkSession.stop()
   }
 
+  /**
+   * 钩子：通过钩子能够找到操作的对象,类似引用
+   * 作用:捕获业务处理异常，方便发送到客户端进行跟踪
+   *
+   * @param func
+   */
+  def actorHook()(func: () => Unit): Unit = {
+    try {
+      func()
+    } catch {
+      case e: Exception => {
+        val out = new ByteArrayOutputStream();
+        e.printStackTrace(new PrintStream(out))
+        val job = Job(data = out.toString(), dataType = ResultDataType.ERROR)
+        //通过sender 把job对象发送到客户端
+        sender ! job
+      }
+    }
+  }
 }
 
+
 object JobActor {
-  def apply(
-             sparkInterpreter: SparkInterpreter,
-             engineSession: EngineSession,
-             sparkConf: SparkConf): Props = {
+  def apply(sparkInterpreter: SparkInterpreter, engineSession: EngineSession, sparkConf: SparkConf): Props = {
     Props(new JobActor(sparkInterpreter, engineSession, sparkConf))
   }
 }

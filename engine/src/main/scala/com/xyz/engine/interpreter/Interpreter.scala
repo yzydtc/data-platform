@@ -1,4 +1,4 @@
-package com.xyz.engine.intepreter
+package com.xyz.engine.interpreter
 
 import org.json4s.JsonAST.JObject
 import org.apache.spark.SparkConf
@@ -59,5 +59,5 @@ trait Interpreter {
    * @param order
    * @return
    */
-  private[intepreter] def execute(order: String): ExecuteResponse
+  private[interpreter] def execute(order: String): ExecuteResponse
 }
